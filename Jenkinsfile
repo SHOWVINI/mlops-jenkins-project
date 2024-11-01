@@ -34,6 +34,17 @@ pipeline {
 				}
 			}
 		}
+		stage("Tag and Push") {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'docker-hub', usernameVariable: 'DOCKER_USER_ID', passwordVariable: 'DOCKER_USER_PASSWORD')]) {
+
+                    sh "docker tag jenkins-pipeline_web:latest ${DOCKER_USER_ID}/jenkins-app:${BUILD_NUMBER}"
+
+                    sh "echo ${DOCKER_USER_PASSWORD} | docker login -u ${DOCKER_USER_ID} --password-stdin"
+                    sh "docker push ${DOCKER_USER_ID}/jenkins-app:${BUILD_NUMBER}"
+                }
+            }
+        }
 		stage("deploy") {
 			steps {
 				sh "docker compose up -d"
